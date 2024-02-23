@@ -1,0 +1,3 @@
+FROM --platform=arm64 python:3.9-bullseye:latest
+LABEL maintainer=kirklimushin@gmail.com
+WORKDIR /project/dir

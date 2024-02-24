@@ -1,6 +1,5 @@
 import torch
 from torch.nn import Module 
-import gc
 import time
 import numpy
 from src.inference import gpu_utils as utils
@@ -57,9 +56,11 @@ def measure_inference_time(
         if 'cuda' in inference_device:
             
             start_events[idx].record()
-            _ = network.to(inference_device).forward(device_data)
+            predictions = network.to(inference_device).forward(device_data)
             end_events[idx].record()
-            
+
+            predictions._zero()
+
             elapsed_time = end_events[idx].elapsed_time(start_events[idx])
             torch.cuda.synchronize()
 

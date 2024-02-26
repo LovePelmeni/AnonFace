@@ -59,6 +59,11 @@ def get_train_augmentations(
                     interpolation_down=cv2.INTER_LINEAR,
                 ),
             ]),
+            albumentations.PadIfNeeded(
+                min_height=image_height,
+                min_width=image_width,
+                border_mode=cv2.BORDER_CONSTANT
+            ) ,
             albumentations.Normalize(
                 mean=norm_mean, std=norm_std, 
                 always_apply=True
@@ -104,6 +109,11 @@ def get_validation_augmentations(
                     interpolation_down=cv2.INTER_LINEAR,
                 ),
             ]),
+            albumentations.PadIfNeeded(
+                min_height=image_height,
+                min_width=image_width,
+                border_mode=cv2.BORDER_CONSTANT
+            ) ,
             albumentations.Normalize(mean=norm_mean, std=norm_std)
         ], bbox_params=albumentations.BboxParams(format='coco', label_fields='bboxes')
     )

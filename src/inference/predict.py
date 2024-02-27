@@ -9,6 +9,7 @@ import json
 import glob
 import os
 import pathlib
+import cv2
 
 logger = logging.getLogger("inference_logger")
 handler = logging.FileHandler(filename="inference_model_logs.log")
@@ -41,7 +42,8 @@ class InferenceModel(object):
 
             config_path = os.path.join(root_dir, config_paths[-1])
 
-        configuration = json.load(fp=config_path)
+        configuration = json.load(fp=open(config_path, mode='rb'))
+
         image_size = configuration.get("input_image_size")
         face_margin_size = configuration.get("face_margin_size", 50)
         min_face_size = configuration.get("min_face_size", 20)
@@ -75,25 +77,37 @@ class InferenceModel(object):
         removal_type: typing.Literal['blackout', 'blur'], 
         input_img: numpy.ndarray
     ):
-        boxes, _ = self._detector.detect(input_img, landmarks=False)
+        """
+        Removes all human faces from the given image.
+        
+        Parameters:
+        -----------
+            - removal_type - type of strategy to use for face removal 
+            - input_img - input numpy.ndarray image containing human faces.
+        
+        Returns:
+            - new image with removed or blurred faces
+        """
+        boxes, _ = self._detector.detect(
+            input_img, 
+            landmarks=False
+        )
         
         for box in boxes:
 
-            x1 = min(max(0, box[0]), input_img.shape[1]-1)
-            x2 = min(max(0, box[1]), input_img.shape[1]-1)
-            y1 = min(max(0, box[2]), input_img.shape[0]-1)
-            y2 = min(max(0, box[3]), input_img.shape[0]-1)
+            x1 = int(min(max(0, box[0]), input_img.shape[1]-1))
+            y1 = int(min(max(0, box[1]), input_img.shape[1]-1))
+            x2 = int(min(max(0, box[2]), input_img.shape[0]-1))
+            y2 = int(min(max(0, box[3]), input_img.shape[0]-1))
 
-            face = input_img[x1:y1, x2:y2]
-
+            face = input_img[y1:y2, x1:x2]
+            
             if removal_type == 'blackout':
                 removed_face = self._face_blackout_processor.remove_image_face(input_img=face)
 
             if removal_type == 'blur':
                 removed_face = self._face_blur_processor.remove_image_face(input_img=face)
 
-            input_img[x1:x2, y1:y2] = removed_face
+            input_img[y1:y2, x1:x2] = removed_face
         return input_img
-
-
 

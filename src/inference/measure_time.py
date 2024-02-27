@@ -72,6 +72,3 @@ def measure_inference_time(
         utils.reset_gpu_speed()
 
     return numpy.mean(times)
-
-
-

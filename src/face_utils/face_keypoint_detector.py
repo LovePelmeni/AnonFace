@@ -6,6 +6,7 @@ import logging
 logger = logging.getLogger("keypoint_logger")
 file_handler = logging.FileHandler(filename="face_keypoints_logs.log")
 logger.addHandler(file_handler)
+
 class FaceKeypointDetector(object):
     """
     Detects 68 landmark keypoints on human
@@ -32,3 +33,32 @@ class FaceKeypointDetector(object):
             ]
             points.append(point)
         return points
+
+    def find_keypoints(self, input_face_img: numpy.ndarray) -> typing.List:
+        """
+        Returns list of keypoints coordinates,
+        detected by the network on the image
+        
+        Parameters:
+        -----------
+            input_img - 
+            boxes - list of bounding boxes, of human faces
+        """
+        try:
+            faces = self.detector(input_face_img)
+            faces_landmarks = []
+            img_height, img_width = input_face_img.shape[:2]
+            
+            for face in faces:
+                landmarks = self.shape_predictor(input_face_img, face)
+                processed_landmarks = self._process_landmarks(
+                    img_height, 
+                    img_width, 
+                    landmarks
+                )
+                faces_landmarks.append(processed_landmarks)
+            return numpy.asarray(faces_landmarks)
+            
+        except(Exception) as err:
+            logger.error(err)
+            return []

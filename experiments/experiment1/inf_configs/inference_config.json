@@ -1,0 +1,7 @@
+{
+    "input_image_size": 512,
+    "face_margin_size": 100,
+    "min_face_size": 100,
+    "keypoint_model_path": "libs/shape_predictor_68_face_landmarks.dat",
+    "keypoint_total_landmarks": 68
+}
